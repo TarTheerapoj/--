@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Dumbbell, Clock, Target, TrendingUp } from "lucide-react";
 import { WORKOUTS } from "@/lib/data/workouts";
 import ScoreDistributionChart from "@/components/charts/ScoreDistributionChart";
@@ -81,21 +80,37 @@ export default function WorkoutsPage() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
-                <div className="space-y-3">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                <div className="space-y-5">
+                  <p className="text-xs font-black text-foreground/50 uppercase tracking-widest">
                     อัตราการทำ Rx vs Scaled
                   </p>
+
+                  {/* Combined stacked bar */}
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-medium">Rx</span>
-                      <span className="text-muted-foreground">{workout.completionRateRx}%</span>
+                    <div className="flex w-full h-8 rounded overflow-hidden">
+                      <div
+                        className="flex items-center justify-center text-xs font-black text-[#111] tracking-wide"
+                        style={{ width: `${workout.completionRateRx}%`, backgroundColor: "#9BEC00" }}
+                      >
+                        {workout.completionRateRx}%
+                      </div>
+                      <div
+                        className="flex items-center justify-center text-xs font-black text-white tracking-wide"
+                        style={{ width: `${workout.completionRateScaled}%`, backgroundColor: "#1a1a1a" }}
+                      >
+                        {workout.completionRateScaled}%
+                      </div>
                     </div>
-                    <Progress value={workout.completionRateRx} className="h-2" />
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-medium">Scaled</span>
-                      <span className="text-muted-foreground">{workout.completionRateScaled}%</span>
+                    <div className="flex justify-between text-[11px] font-bold">
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ backgroundColor: "#9BEC00" }} />
+                        <span className="text-foreground/70">Rx</span>
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="text-foreground/70">Scaled</span>
+                        <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ backgroundColor: "#1a1a1a" }} />
+                      </span>
                     </div>
-                    <Progress value={workout.completionRateScaled} className="h-2 [&>div]:bg-blue-400" />
                   </div>
                 </div>
 
