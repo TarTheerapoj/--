@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronRight, AlertTriangle, BookOpen, Youtube } from "lucide-react";
+import { ChevronRight, AlertTriangle, BookOpen, Youtube, GitBranch } from "lucide-react";
 import {
   MOVEMENT_CATALOG,
   MOVEMENTS,
@@ -13,6 +13,18 @@ import {
   type DifficultyLevel,
 } from "@/lib/data/movements";
 import { getWorkoutsContainingMovement } from "@/lib/data/workouts";
+import {
+  getMovementBodyDemands,
+  getResolvedUserStateGuidance,
+} from "@/lib/movement-learning";
+import { getPathwaysForMovement } from "@/lib/pathways";
+import {
+  BodyDemandBadges,
+  DifficultyBandBadge,
+  PathwayLadder,
+} from "@/components/movements/LearningUI";
+import MovementStateTabs from "@/components/movements/MovementStateTabs";
+import { MovementQuickActions, ReadinessLinksPanel } from "@/components/V3Widgets";
 
 const ACCENT = "#9BEC00";
 
@@ -94,6 +106,9 @@ export default async function MovementDetailPage({
   const catColor = CATEGORY_COLOR[entry.category];
   const m = detail as Movement | undefined;
   const appearsInWorkouts = getWorkoutsContainingMovement(slug);
+  const bodyDemands = getMovementBodyDemands(entry, m);
+  const relatedPathways = getPathwaysForMovement(slug);
+  const stateGuidance = getResolvedUserStateGuidance(entry, m);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#f5f6f8" }}>
@@ -180,7 +195,10 @@ export default async function MovementDetailPage({
             </div>
             <div>
               <p className="text-[9px] text-white/25 uppercase tracking-widest mb-1">Difficulty</p>
-              <p className="text-xs font-bold text-white">{DIFFICULTY_LABEL[entry.difficulty]}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-xs font-bold text-white">{DIFFICULTY_LABEL[entry.difficulty]}</p>
+                <DifficultyBandBadge level={entry.difficulty} />
+              </div>
             </div>
             {m?.patterns && m.patterns.length > 0 && (
               <div>
@@ -195,6 +213,12 @@ export default async function MovementDetailPage({
               </p>
             </div>
           </div>
+          {bodyDemands.length > 0 && (
+            <div className="mt-4">
+              <p className="text-[9px] text-white/25 uppercase tracking-widest mb-2">Body Demand</p>
+              <BodyDemandBadges demands={bodyDemands} />
+            </div>
+          )}
         </div>
       </section>
 
@@ -203,7 +227,7 @@ export default async function MovementDetailPage({
 
         {/* STUB — no detailed data yet */}
         {!m && (
-          <div className="max-w-lg mx-auto py-16 text-center">
+          <div className="max-w-3xl mx-auto py-16 text-center">
             <div className="w-14 h-14 rounded-2xl bg-white shadow-sm border border-gray-200 flex items-center justify-center mx-auto mb-5">
               <BookOpen className="w-6 h-6 text-gray-300" />
             </div>
@@ -239,6 +263,24 @@ export default async function MovementDetailPage({
                 </div>
               )}
             </div>
+            {bodyDemands.length > 0 && (
+              <div className="bg-white rounded-xl border border-gray-200 p-4 text-left mb-6">
+                <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-3">Body Demand</p>
+                <BodyDemandBadges demands={bodyDemands} />
+              </div>
+            )}
+            {stateGuidance.length > 0 && (
+              <div className="bg-white rounded-xl border border-gray-200 p-4 text-left mb-6">
+                <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-3">Coach Guidance</p>
+                <MovementStateTabs items={stateGuidance} />
+              </div>
+            )}
+            <div className="mb-6">
+              <MovementQuickActions slug={slug} />
+            </div>
+            <div className="mb-6">
+              <ReadinessLinksPanel movementSlug={slug} />
+            </div>
             {/* Appears in Open Workouts (stub page) */}
             {appearsInWorkouts.length > 0 && (
               <div className="bg-white rounded-xl border border-gray-200 p-4 text-left mb-6">
@@ -256,6 +298,24 @@ export default async function MovementDetailPage({
                       </div>
                       <ChevronRight className="w-3.5 h-3.5 text-gray-300 shrink-0" />
                     </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+            {relatedPathways.length > 0 && (
+              <div className="bg-white rounded-xl border border-gray-200 p-4 text-left mb-6">
+                <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-3">เกี่ยวข้องกับ Pathway</p>
+                <div className="space-y-4">
+                  {relatedPathways.map(pathway => (
+                    <div key={pathway.slug} className="rounded-lg border border-gray-200 p-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <GitBranch className="w-3.5 h-3.5" style={{ color: pathway.accent }} />
+                        <Link href={`/pathways/${pathway.slug}`} className="text-sm font-black hover:opacity-80" style={{ color: pathway.accent }}>
+                          {pathway.title}
+                        </Link>
+                      </div>
+                      <PathwayLadder pathway={pathway} highlightSlug={slug} compact />
+                    </div>
                   ))}
                 </div>
               </div>
@@ -303,6 +363,13 @@ export default async function MovementDetailPage({
                 </div>
               </section>
 
+              {stateGuidance.length > 0 && (
+                <section className="bg-white rounded-xl border border-gray-200 p-6">
+                  <SectionHeader label="เลือกสถานะของคุณ" />
+                  <MovementStateTabs items={stateGuidance} />
+                </section>
+              )}
+
               {/* Progression Chain */}
               {(m.regressions.length > 0 || m.progressions.length > 0) && (
                 <section className="bg-white rounded-xl border border-gray-200 p-6">
@@ -339,6 +406,42 @@ export default async function MovementDetailPage({
                         </Link>
                       ) : null;
                     })}
+                  </div>
+                </section>
+              )}
+
+              {relatedPathways.length > 0 && (
+                <section className="bg-white rounded-xl border border-gray-200 p-6">
+                  <SectionHeader label="Skill Pathways ที่เกี่ยวข้อง" />
+                  <div className="space-y-5">
+                    {relatedPathways.map(pathway => (
+                      <div key={pathway.slug} className="rounded-xl border border-gray-200 p-4">
+                        <div className="flex items-start justify-between gap-3 flex-wrap">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <GitBranch className="w-4 h-4 shrink-0" style={{ color: pathway.accent }} />
+                              <Link
+                                href={`/pathways/${pathway.slug}`}
+                                className="text-sm font-black hover:opacity-80"
+                                style={{ color: pathway.accent }}
+                              >
+                                {pathway.title}
+                              </Link>
+                            </div>
+                            <p className="text-sm text-gray-600 mt-1 leading-relaxed">{pathway.description}</p>
+                          </div>
+                          <Link
+                            href={`/pathways/${pathway.slug}`}
+                            className="text-xs font-bold px-3 py-1.5 rounded-md border border-gray-200 text-gray-500 hover:text-gray-800 hover:border-gray-300 transition-colors"
+                          >
+                            ดู pathway
+                          </Link>
+                        </div>
+                        <div className="mt-4">
+                          <PathwayLadder pathway={pathway} highlightSlug={slug} compact />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </section>
               )}
@@ -405,6 +508,9 @@ export default async function MovementDetailPage({
 
             {/* ── Right Column (sidebar) ─────────────────────────── */}
             <div className="space-y-6">
+              <MovementQuickActions slug={slug} />
+
+              <ReadinessLinksPanel movementSlug={slug} />
 
               {/* Requirements */}
               {(m.mobilityNeeds.length > 0 || m.strengthNeeds.length > 0) && (

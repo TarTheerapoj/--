@@ -1,12 +1,16 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, ImageIcon, ExternalLink } from "lucide-react";
+import { Clock, ImageIcon, ExternalLink, GitBranch } from "lucide-react";
 import { WORKOUTS, type WorkoutDivision } from "@/lib/data/workouts";
-import { useRankingsData } from "@/hooks/useRankingsData";
+import { useRankingsData, type RankingEntry, type RankingEntry26_2 } from "@/hooks/useRankingsData";
 import { cn } from "@/lib/utils";
+import { getPathwayBySlug } from "@/lib/pathways";
+import { MovementSlugLinks } from "@/components/movements/LearningUI";
+import { ReadinessLinksPanel } from "@/components/V3Widgets";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
@@ -34,7 +38,7 @@ function formatTime(seconds: number): string {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
-function buildSharedBins(menReps: number[], womenReps: number[], gender: GenderFilter, workoutId?: string) {
+function buildSharedBins(menReps: number[], womenReps: number[], gender: GenderFilter) {
   const all = [...menReps, ...womenReps];
   if (!all.length) return [];
   const globalMin = Math.floor(Math.min(...all) / BIN_SIZE) * BIN_SIZE;
@@ -60,8 +64,8 @@ function ScoreDistributionChart({
   workoutId?: string;
 }) {
   const bins = useMemo(
-    () => buildSharedBins(menReps, womenReps, gender, workoutId),
-    [menReps, womenReps, gender, workoutId]
+    () => buildSharedBins(menReps, womenReps, gender),
+    [menReps, womenReps, gender]
   );
 
   if (!bins.length) return (
@@ -151,10 +155,11 @@ function WorkoutStats({ workout }: { workout: typeof WORKOUTS[0] }) {
     if (workout.id !== "26.1") return null;
     const isValid = (reps: string, div: string) =>
       reps && reps !== "0" && reps !== "Null" && div && div !== "-";
-    const menReps = (raw as any[])
+    const rankingRows = raw as RankingEntry[];
+    const menReps = rankingRows
       .filter(r => isValid(r["Reps Men"], r["Division Men"]) && r["Division Men"] === "RX")
       .map(r => Number(r["Reps Men"]));
-    const womenReps = (raw as any[])
+    const womenReps = rankingRows
       .filter(r => isValid(r["Reps Women"], r["Division Women"]) && r["Division Women"] === "RX")
       .map(r => Number(r["Reps Women"]));
     const avg = (arr: number[]) =>
@@ -173,20 +178,32 @@ function WorkoutStats({ workout }: { workout: typeof WORKOUTS[0] }) {
     const avg = (arr: number[]) =>
       arr.length ? Math.round(arr.reduce((s, v) => s + v, 0) / arr.length) : 0;
 
-    const parseGroup = (scoreKey: string, divKey: string) => {
-      const rxRows = (raw as any[]).filter(r => r[divKey] === "RX" && r[scoreKey] && r[scoreKey] !== "(--)" && r[scoreKey] !== "--");
-      const finished   = rxRows.filter(r => parseScore262(r[scoreKey]).type === "finished").map(r => parseScore262(r[scoreKey]).value);
-      const timed_out  = rxRows.filter(r => parseScore262(r[scoreKey]).type === "timed_out").map(r => parseScore262(r[scoreKey]).value);
+    const rankingRows = raw as RankingEntry26_2[];
+    const parseGroup = (
+      scoreKey: "Score Men" | "Score Women",
+      divKey: "Division Men" | "Division Women"
+    ) => {
+      const rxRows = rankingRows.filter(row => {
+        const score = row[scoreKey];
+        return row[divKey] === "RX" && score && score !== "(--)" && score !== "--";
+      });
+      const finished = rxRows.flatMap(row => {
+        const parsed = parseScore262(row[scoreKey]);
+        return parsed.type === "finished" ? [parsed.value] : [];
+      });
+      const timedOut = rxRows.flatMap(row => {
+        const parsed = parseScore262(row[scoreKey]);
+        return parsed.type === "timed_out" ? [parsed.value] : [];
+      });
       return {
         finishedCount: finished.length,
-        timedOutCount: timed_out.length,
+        timedOutCount: timedOut.length,
         totalRx: rxRows.length,
         fastestSec: finished.length ? Math.min(...finished) : 0,
         avgTimeSec: avg(finished),
-        avgReps: avg(timed_out),
-        topReps: timed_out.length ? Math.max(...timed_out) : 0,
-        // for chart: reps from timed-out athletes
-        repsArr: timed_out,
+        avgReps: avg(timedOut),
+        topReps: timedOut.length ? Math.max(...timedOut) : 0,
+        repsArr: timedOut,
       };
     };
 
@@ -216,7 +233,7 @@ function WorkoutStats({ workout }: { workout: typeof WORKOUTS[0] }) {
             { label: "สูงสุด ชาย",    color: "#3b82f6" },
             { label: "ค่าเฉลี่ย หญิง", color: "#f472b6" },
             { label: "สูงสุด หญิง",   color: "#f472b6" },
-          ].map(({ label, color }) => (
+          ].map(({ label }) => (
             <div key={label} className="rounded-lg border border-border/30 bg-secondary/30 px-4 py-3 text-center min-w-[80px]">
               <p className="text-[9px] text-muted-foreground/40 uppercase tracking-widest mb-1">{label}</p>
               <p className="text-xl font-black text-muted-foreground/20">—</p>
@@ -392,6 +409,81 @@ function MovementBadge({ name, slug }: { name: string; slug?: string }) {
   );
 }
 
+function WorkoutReadinessPanel({ workout }: { workout: typeof WORKOUTS[0] }) {
+  if (!workout.readiness) return null;
+
+  const relatedPathways = workout.readiness.pathwaySlugs
+    .map(slug => getPathwayBySlug(slug))
+    .filter((pathway): pathway is NonNullable<ReturnType<typeof getPathwayBySlug>> => !!pathway);
+
+  return (
+    <div className="rounded-xl border border-border/50 p-5 space-y-5">
+      <div className="flex items-center gap-3">
+        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Workout Readiness</p>
+        <div className="flex-1 h-px bg-border/50" />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">Key skill demands</p>
+          <div className="flex flex-wrap gap-1.5">
+            {workout.readiness.keyDemands.map(demand => (
+              <span key={demand} className="text-[10px] px-2 py-1 rounded-md bg-secondary/60 text-foreground/70 border border-border/40 font-bold">
+                {demand}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">Where athletes get stuck</p>
+          <ul className="space-y-2">
+            {workout.readiness.commonStickingPoints.map(point => (
+              <li key={point} className="text-xs text-muted-foreground leading-relaxed flex items-start gap-2">
+                <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-orange-400 shrink-0" />
+                {point}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">If you are blocked here, train this first</p>
+          <MovementSlugLinks slugs={workout.readiness.trainFirstMovementSlugs} />
+        </div>
+      </div>
+
+      {relatedPathways.length > 0 && (
+        <div className="pt-1">
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">Related pathways</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {relatedPathways.map(pathway => (
+              <Link
+                key={pathway.slug}
+                href={`/pathways/${pathway.slug}`}
+                className="group rounded-xl border border-border/50 bg-secondary/20 px-4 py-3 hover:bg-background hover:shadow-sm transition-all"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <GitBranch className="w-3.5 h-3.5 shrink-0" style={{ color: pathway.accent }} />
+                      <p className="text-sm font-black text-foreground leading-tight">{pathway.title}</p>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{pathway.description}</p>
+                  </div>
+                  <ExternalLink className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors shrink-0" />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <ReadinessLinksPanel workoutId={workout.id} />
+    </div>
+  );
+}
+
 function WorkoutCard({ workout }: { workout: typeof WORKOUTS[0] }) {
   const [activeDivision, setActiveDivision] = useState<WorkoutDivision["name"]>("Rx");
   const div = workout.divisions.find(d => d.name === activeDivision) ?? workout.divisions[0];
@@ -503,7 +595,8 @@ function WorkoutCard({ workout }: { workout: typeof WORKOUTS[0] }) {
           </div>
         </div>
 
-        {/* Row 2: Stats + chart (full width) */}
+        <WorkoutReadinessPanel workout={workout} />
+
         <WorkoutStats workout={workout} />
 
       </CardContent>
@@ -549,6 +642,21 @@ export default function WorkoutsPage() {
           <p className="text-white/50 text-sm mt-2">
             รายละเอียดและสถิติแต่ละ Workout ใน CrossFit Open 2026
           </p>
+          <div className="mt-4 flex gap-3 flex-wrap">
+            <Link
+              href="/readiness"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black transition-all hover:opacity-90"
+              style={{ backgroundColor: "#9BEC00", color: "#111" }}
+            >
+              ดู Readiness Checks
+            </Link>
+            <Link
+              href="/recommend"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black border border-white/15 text-white hover:border-white/25 transition-all"
+            >
+              Recommendation Builder
+            </Link>
+          </div>
         </div>
       </section>
 

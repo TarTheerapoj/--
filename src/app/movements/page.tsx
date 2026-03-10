@@ -12,6 +12,9 @@ import {
   type MovementCatalogEntry,
   type DifficultyLevel,
 } from "@/lib/data/movements";
+import { PathwayPreviewCard } from "@/components/movements/LearningUI";
+import { RecommendationResultCard, SavedProgressPanel } from "@/components/V3Widgets";
+import { SKILL_PATHWAYS } from "@/lib/pathways";
 
 const ACCENT = "#9BEC00";
 
@@ -399,9 +402,9 @@ export default function MovementsPage() {
                 <span style={{ color: ACCENT }}>Movement</span> Library
               </h1>
               <p className="text-white/40 text-sm mt-1.5 max-w-lg leading-relaxed">
-                คู่มือท่วงท่า CrossFit ครบทุก category — รวม coaching cues, progressions และ common faults
+                จาก movement library ไปสู่ guided learning system — ค้นหาท่า, เข้าใจสิ่งที่ติด, แล้วรู้ว่าควรฝึกอะไรต่อ
               </p>
-              <div className="mt-4">
+              <div className="mt-4 flex gap-3 flex-wrap">
                 <Link
                   href="/movements/start-here"
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black transition-all hover:opacity-90"
@@ -410,12 +413,20 @@ export default function MovementsPage() {
                   <Zap className="w-3.5 h-3.5" />
                   ไม่รู้จะเริ่มที่ไหน? Start Here →
                 </Link>
+                <Link
+                  href="/pathways"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black border border-white/15 text-white hover:border-white/25 transition-all"
+                >
+                  <GitBranch className="w-3.5 h-3.5" />
+                  ดู Skill Pathways
+                </Link>
               </div>
             </div>
             <div className="flex gap-5">
               {[
                 { label: "Movements",   value: ALL_MOVEMENTS.length },
                 { label: "มี Detail",   value: ALL_MOVEMENTS.filter(m => "shortDesc" in m && !!(m as {shortDesc?:string}).shortDesc).length },
+                { label: "Pathways",    value: SKILL_PATHWAYS.length },
               ].map(({ label, value }) => (
                 <div key={label} className="text-right">
                   <p className="text-2xl font-black" style={{ color: ACCENT }}>{value}</p>
@@ -426,6 +437,30 @@ export default function MovementsPage() {
           </div>
         </div>
       </section>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-2">
+        <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Guided Pathways</p>
+            <p className="text-sm text-gray-600 mt-1">เข้า pathway ก่อน ถ้าคุณอยากรู้ว่า movement ไหนควรมาก่อนหรือมาหลัง</p>
+          </div>
+          <Link href="/pathways" className="text-xs font-bold text-gray-500 hover:text-gray-800 transition-colors">
+            ดูทั้งหมด →
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {SKILL_PATHWAYS.slice(0, 3).map(pathway => (
+            <PathwayPreviewCard key={pathway.slug} pathway={pathway} />
+          ))}
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+        <div className="grid grid-cols-1 xl:grid-cols-[1.05fr_0.95fr] gap-6">
+          <RecommendationResultCard title="Current recommendation" />
+          <SavedProgressPanel />
+        </div>
+      </div>
 
       {/* ── Sticky Filter Bar ─────────────────────────────────────────── */}
       <div className="sticky top-16 z-10 bg-white border-b border-gray-200 shadow-sm">

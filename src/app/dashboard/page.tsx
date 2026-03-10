@@ -102,7 +102,7 @@ export default function DashboardPage() {
                   { year: "2024", v: 16 },
                   { year: "2025", v: 19 },
                   { year: "2026", v: 24 },
-                ].map(({ year, v }, i, arr) => (
+                ].map(({ year, v }) => (
                   <div key={year} className="text-center">
                     <p className="text-xs font-black">{v}</p>
                     <p className="text-[9px] text-muted-foreground">{year}</p>
@@ -147,7 +147,7 @@ export default function DashboardPage() {
 
             {/* Left: article text */}
             <div className="lg:col-span-3 space-y-5 text-[15px] text-white/75 leading-relaxed">
-              <p>สำหรับตัวผม กีฬา CrossFit เติบโตจากคอมมูนิตี้มากกว่าจากแมสมีเดีย จุดเปลี่ยนสำคัญมักไม่ใช่วันที่คนพูดถึงมันเยอะขึ้น แต่คือวันที่ <span className="text-white font-semibold">"มีคนลงแข่งขัน"</span> และ <span className="text-white font-semibold">"พบเจอสถานที่ฝึกซ้อม งานแข่งขัน"</span> เริ่มขยับเพิ่มขึ้นพร้อมกันอย่างมีนัยสำคัญ</p>
+              <p>สำหรับตัวผม กีฬา CrossFit เติบโตจากคอมมูนิตี้มากกว่าจากแมสมีเดีย จุดเปลี่ยนสำคัญมักไม่ใช่วันที่คนพูดถึงมันเยอะขึ้น แต่คือวันที่ <span className="text-white font-semibold">&quot;มีคนลงแข่งขัน&quot;</span> และ <span className="text-white font-semibold">&quot;พบเจอสถานที่ฝึกซ้อม งานแข่งขัน&quot;</span> เริ่มขยับเพิ่มขึ้นพร้อมกันอย่างมีนัยสำคัญ</p>
 
               <p>ในเชิงข้อมูลตรงๆ กราฟแรกบอกว่า จำนวนผู้ลงทะเบียน CrossFit Open ในไทยเพิ่มจาก <span className="font-bold" style={{ color: "#9BEC00" }}>170 คนในปี 2017 เป็น 604 คนในปี 2026</span> แต่เส้นทางนี้ไม่ได้เป็นเส้นตรงแบบสวยงามตลอดทาง ปี 2018 เคยขึ้นไปถึง 269 ก่อนจะถอยลงในปี 2019 และลงลึกสุดที่ 146 ในปี 2020 จากนั้นค่อยๆ ฟื้นตัวในช่วง 2021–2024 ก่อนจะ<span className="text-white font-semibold">เร่งชันอย่างชัดเจน</span>ในปี 2025 ที่ 360 และกระโดดอีกครั้งในปี 2026 ที่ 604</p>
 
@@ -157,7 +157,7 @@ export default function DashboardPage() {
 
               {/* Pull quote */}
               <blockquote className="border-l-2 pl-4 py-1 my-6" style={{ borderColor: "#9BEC00" }}>
-                <p className="text-base font-semibold text-white leading-snug">"ไทยกำลังเห็นทั้ง participation และ infrastructure โตพร้อมกัน แต่ด้วยความเร็วไม่เท่ากัน — และนั่นคือสัญญาณที่แข็งแรง"</p>
+                <p className="text-base font-semibold text-white leading-snug">&quot;ไทยกำลังเห็นทั้ง participation และ infrastructure โตพร้อมกัน แต่ด้วยความเร็วไม่เท่ากัน — และนั่นคือสัญญาณที่แข็งแรง&quot;</p>
               </blockquote>
 
               <p>ในเชิงธุรกิจกีฬา จำนวนคนลง Open กับจำนวน affiliate ไม่ใช่ตัวเลขชนิดเดียวกัน ตัวแรกสะท้อน <span className="text-white font-semibold">participation demand</span> ตัวหลังสะท้อน <span className="text-white font-semibold">infrastructure</span> ตลาดกีฬาใดก็ตามที่มีแต่ demand แต่ไม่มี infrastructure รองรับ มักโตได้ไม่นาน</p>

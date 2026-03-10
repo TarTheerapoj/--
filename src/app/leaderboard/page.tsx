@@ -5,7 +5,7 @@ import ComingSoonWrapper from "@/components/ComingSoonWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trophy, Medal, MapPin, Building2 } from "lucide-react";
+import { MapPin, Building2 } from "lucide-react";
 import { ATHLETES, type Division } from "@/lib/data/athletes";
 import { WORKOUTS } from "@/lib/data/workouts";
 

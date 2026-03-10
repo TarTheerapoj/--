@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Trophy, Dumbbell, BarChart3, MapPin, BookOpen, Menu, X } from "lucide-react";
+import { Trophy, Dumbbell, BarChart3, MapPin, BookOpen, Menu, X, Sparkles, Bookmark } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -10,6 +10,8 @@ const NAV_ITEMS = [
   { href: "/dashboard",   label: "ภาพรวม",          icon: BarChart3,  comingSoon: false },
   { href: "/workouts",    label: "เวิร์คเอาท์",       icon: Dumbbell,   comingSoon: false },
   { href: "/movements",   label: "Movements",        icon: BookOpen,   comingSoon: false },
+  { href: "/recommend",   label: "แนะนำ",           icon: Sparkles,   comingSoon: false },
+  { href: "/saved",       label: "ของฉัน",          icon: Bookmark,   comingSoon: false },
   { href: "/leaderboard", label: "ลีดเดอร์บอร์ด",  icon: Trophy,     comingSoon: true  },
   { href: "/provinces",   label: "จังหวัด",          icon: MapPin,     comingSoon: false },
 ];
@@ -51,7 +53,7 @@ export default function Navbar() {
                 href={href}
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                  pathname === href
+                  pathname === href || pathname.startsWith(`${href}/`)
                     ? "bg-primary/15 text-primary"
                     : "text-muted-foreground hover:text-foreground hover:bg-black/5"
                 )}
@@ -98,7 +100,7 @@ export default function Navbar() {
                   onClick={() => setMobileOpen(false)}
                   className={cn(
                     "flex items-center gap-2 px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
-                    pathname === href
+                    pathname === href || pathname.startsWith(`${href}/`)
                       ? "bg-primary/15 text-primary"
                       : "text-muted-foreground hover:text-foreground hover:bg-black/5"
                   )}

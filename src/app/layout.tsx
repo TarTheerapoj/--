@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Sarabun } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import { V3Provider } from "@/components/V3Provider";
 
 const sarabun = Sarabun({
   variable: "--font-sarabun",
@@ -22,8 +23,10 @@ export default function RootLayout({
   return (
     <html lang="th">
       <body className={`${sarabun.variable} font-sans antialiased min-h-screen`}>
-        <Navbar />
-        {children}
+        <V3Provider>
+          <Navbar />
+          {children}
+        </V3Provider>
       </body>
     </html>
   );

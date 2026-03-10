@@ -4,6 +4,13 @@ export interface WorkoutDivision {
   equipment: { women: string; men: string };
 }
 
+export interface WorkoutReadiness {
+  keyDemands: string[];
+  commonStickingPoints: string[];
+  trainFirstMovementSlugs: string[];
+  pathwaySlugs: string[];
+}
+
 export interface Workout {
   id: string;
   name: string;
@@ -21,6 +28,7 @@ export interface Workout {
   topScoreRx: string;
   topScoreScaled: string;
   scoreDistribution: { label: string; count: number }[];
+  readiness?: WorkoutReadiness;
   comingSoon?: boolean;
 }
 
@@ -93,6 +101,21 @@ export const WORKOUTS: Workout[] = [
       { label: "9:00–11:59", count: 0 },
       { label: "Time Cap", count: 0 },
     ],
+    readiness: {
+      keyDemands: [
+        "squat endurance",
+        "wall-ball efficiency",
+        "cyclical breathing under fatigue",
+        "jump-over rhythm and pacing",
+      ],
+      commonStickingPoints: [
+        "เปิดเร็วเกินไปที่ wall ball แล้วขาหายตั้งแต่กลาง workout",
+        "เสีย breathing rhythm จนต้องพักหน้ากล่องนาน",
+        "box jump-over turnover ช้าลงมากหลังหัวใจขึ้นสูง",
+      ],
+      trainFirstMovementSlugs: ["air-squat", "wall-ball", "box-jump-over", "thruster"],
+      pathwaySlugs: ["squat-path", "open-engine-path"],
+    },
   },
   {
     id: "26.2",
@@ -147,6 +170,21 @@ export const WORKOUTS: Workout[] = [
       { label: "11:00–13:59", count: 0 },
       { label: "Time Cap", count: 0 },
     ],
+    readiness: {
+      keyDemands: [
+        "overhead stability under fatigue",
+        "advanced pulling progression",
+        "grip management",
+        "transition efficiency between dumbbell and rig",
+      ],
+      commonStickingPoints: [
+        "overhead lunge ตัดเกมก่อนเข้าชุด pull-up",
+        "pulling skill ไม่พอ ทำให้ติดอยู่ที่รอบกลาง",
+        "grip หมดก่อนถึง chest-to-bar หรือ muscle-up",
+      ],
+      trainFirstMovementSlugs: ["db-walking-lunge", "kipping-pull-up", "chest-to-bar", "kipping-muscle-up"],
+      pathwaySlugs: ["pulling-path", "hanging-core-path"],
+    },
   },
   {
     id: "26.3",
@@ -173,10 +211,14 @@ export function getWorkoutsContainingMovement(slug: string): Workout[] {
   return WORKOUTS.filter(w => w.movementSlugs?.includes(slug));
 }
 
+export function getWorkoutById(id: string): Workout | undefined {
+  return WORKOUTS.find(workout => workout.id === id);
+}
+
 export const SUMMARY_STATS = {
   totalAthletes: 604,
   totalAffiliates: 24,
-  totalProvinces: 18,
+  totalProvinces: 7,
   year: 2026,
   edition: "CrossFit Open 26",
   divisions: [

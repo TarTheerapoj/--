@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, BarChart3, Dumbbell, MapPin, ChevronRight, Clock, BookOpen, Sparkles } from "lucide-react";
 import { SUMMARY_STATS, WORKOUTS } from "@/lib/data/workouts";
+import { RecommendationResultCard, SavedProgressPanel } from "@/components/V3Widgets";
 
 const latest = SUMMARY_STATS.participationByYear[SUMMARY_STATS.participationByYear.length - 1];
 
@@ -51,6 +52,18 @@ const NEWS_CARDS = [
     iconBg: "#111",
     iconColor: "#9BEC00",
     iconLabel: "MOV",
+  },
+  {
+    tag: "MOVEMENT V3",
+    title: "Recommendation, Saved Progress และ Readiness Checks",
+    sub: "Personalized pathway · local save · coach mode →",
+    href: "/recommend",
+    accent: false,
+    comingSoon: false,
+    isNew: true,
+    iconBg: "#9BEC00",
+    iconColor: "#111",
+    iconLabel: "V3",
   },
   {
     tag: "PROVINCES & AFFILIATES",
@@ -229,6 +242,22 @@ export default function LandingPage() {
               {!comingSoon && <ChevronRight className="w-5 h-5 text-[#bbb] group-hover:text-primary transition-colors shrink-0" />}
             </Link>
           ))}
+        </div>
+      </section>
+
+      <section className="bg-[#f9f9f9] border-t border-[#eee] text-[#111]">
+        <div className="max-w-7xl mx-auto px-6 sm:px-10 py-10 space-y-5">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <p className="text-[10px] font-black tracking-[0.25em] uppercase" style={{ color: "#9BEC00" }}>Movement V3</p>
+              <p className="text-sm text-[#666] mt-1">ระบบแนะนำฝึก, saved progress, และ readiness checks แบบ local-first</p>
+            </div>
+            <Link href="/recommend" className="text-xs font-bold text-[#888] hover:text-primary transition-colors">เปิด Recommendation Builder →</Link>
+          </div>
+          <div className="grid grid-cols-1 xl:grid-cols-[1.05fr_0.95fr] gap-6">
+            <RecommendationResultCard title="Your current recommendation" />
+            <SavedProgressPanel />
+          </div>
         </div>
       </section>
 
