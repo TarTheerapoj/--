@@ -3,7 +3,6 @@ import {
   getMovementDetail,
   type MovementCatalogEntry,
 } from "@/lib/data/movements";
-import { getWorkoutById } from "@/lib/data/workouts";
 import { getResolvedUserStateGuidance, type UserStateKey } from "@/lib/movement-learning";
 import {
   getPathwayBySlug,
@@ -26,11 +25,18 @@ export const USER_STATE_SHORT_LABELS: Record<UserStateKey, string> = {
   buildPerformance: "Performance",
 };
 
+export type KickStartFocus =
+  | "start-here"
+  | "pulling-path"
+  | "squat-path"
+  | "open-engine-path"
+  | "barbell-olympic-path";
+
+export type KickStartLevel = "foundation" | "building" | "workout";
+
 export interface RecommendationAnswers {
-  blockerPathwaySlug: string;
-  targetWorkoutId: "none" | "26.1" | "26.2";
-  currentState: UserStateKey;
-  preference: "consistency" | "skill" | "open-ready";
+  starterFocus: KickStartFocus;
+  experienceLevel: KickStartLevel;
 }
 
 export interface RecommendationQuestionOption<T extends string = string> {
@@ -54,18 +60,12 @@ export interface RecommendationResult {
   coachNote: string;
   caution: string;
   openInsight?: string;
-  targetWorkoutId?: string;
   readinessProfileSlug?: string;
 }
 
 export interface V3UserState {
-  favoriteMovementSlugs: string[];
-  savedPathwaySlugs: string[];
-  trainLaterMovementSlugs: string[];
-  movementStates: Partial<Record<string, UserStateKey>>;
   readinessResults: Partial<Record<string, ReadinessResult>>;
   lastRecommendation?: RecommendationResult;
-  coachModeEnabled: boolean;
 }
 
 export type ReadinessBand = "needs-foundation" | "building" | "ready-to-push";
@@ -102,20 +102,27 @@ export interface ReadinessResult {
 }
 
 export const DEFAULT_RECOMMENDATION_ANSWERS: RecommendationAnswers = {
-  blockerPathwaySlug: "pulling-path",
-  targetWorkoutId: "none",
-  currentState: "cannotDoYet",
-  preference: "consistency",
+  starterFocus: "start-here",
+  experienceLevel: "foundation",
+};
+
+export const KICK_START_LEVEL_LABELS: Record<KickStartLevel, string> = {
+  foundation: "เริ่มแบบง่าย ๆ",
+  building: "พอมีพื้นฐานแล้ว",
+  workout: "อยากเอาไปใช้ในคลาส",
+};
+
+export const KICK_START_FOCUS_LABELS: Record<KickStartFocus, string> = {
+  "start-here": "ยังไม่แน่ใจว่าจะเริ่มตรงไหน",
+  "pulling-path": "ท่าดึงบนบาร์",
+  "squat-path": "ขาและสควอต",
+  "open-engine-path": "หอบง่ายหรือเพซหลุด",
+  "barbell-olympic-path": "บาร์เบลและท่าเหนือศีรษะ",
 };
 
 export const DEFAULT_V3_USER_STATE: V3UserState = {
-  favoriteMovementSlugs: [],
-  savedPathwaySlugs: [],
-  trainLaterMovementSlugs: [],
-  movementStates: {},
   readinessResults: {},
   lastRecommendation: undefined,
-  coachModeEnabled: false,
 };
 
 const SCORE_OPTIONS: Array<RecommendationQuestionOption<"0" | "1" | "2">> = [
@@ -138,105 +145,56 @@ const SCORE_OPTIONS: Array<RecommendationQuestionOption<"0" | "1" | "2">> = [
 
 export const RECOMMENDATION_QUESTIONS: RecommendationQuestion[] = [
   {
-    id: "blockerPathwaySlug",
-    title: "ตอนนี้คุณติดอยู่ตรงไหนมากที่สุด",
-    description: "เลือก skill gap หลัก เพื่อให้ระบบจัดลำดับทางฝึกให้ใกล้กับปัญหาจริง",
+    id: "starterFocus",
+    title: "ตอนนี้อยากเริ่มจากด้านไหน",
+    description: "เลือกด้านที่รู้สึกติดที่สุดตอนนี้พอ ไม่ต้องคิดเยอะ",
     options: [
       {
+        value: "start-here",
+        label: "ยังไม่แน่ใจ ขอเริ่มจากง่าย ๆ ก่อน",
+        description: "ให้ระบบเลือกทางเริ่มที่ปลอดภัยและไปต่อได้ง่ายสำหรับมือใหม่",
+      },
+      {
         value: "pulling-path",
-        label: "Pulling / Pull-Up",
-        description: "ยังติดแรงดึง, kip, chest-to-bar หรือ muscle-up",
+        label: "ท่าดึงบนบาร์",
+        description: "รู้สึกว่าพวก pull-up หรือแรงดึงยังเป็นจุดที่ติดอยู่",
       },
       {
         value: "squat-path",
-        label: "Squat / Wall Ball",
-        description: "ขาและ squat pattern พังเร็ว, wall-ball ไม่มี rhythm",
-      },
-      {
-        value: "hanging-core-path",
-        label: "Hanging Core",
-        description: "แกว่งบนบาร์ได้ แต่คุม midline หรือ bar volume ไม่อยู่",
+        label: "ขาและสควอต",
+        description: "สควอต วอลล์บอล หรือความอึดของขายังเป็นจุดที่พาแผ่ว",
       },
       {
         value: "open-engine-path",
-        label: "Engine / Pacing",
-        description: "ทำ movement ได้ แต่หลุด pace, หายใจ, turnover ใน metcon",
+        label: "หอบง่ายหรือเพซหลุด",
+        description: "ทำท่าได้บ้าง แต่พอเหนื่อยแล้วจังหวะเริ่มหลุด",
       },
       {
         value: "barbell-olympic-path",
-        label: "Barbell Skill",
-        description: "ติด receiving position, timing, หรือ overhead control",
-      },
-      {
-        value: "jump-rope-path",
-        label: "Jump Rope Timing",
-        description: "double-under หรือ rope rhythm ยังเป็น pain point",
+        label: "บาร์เบลและท่าเหนือศีรษะ",
+        description: "ยังไม่มั่นใจกับจังหวะบาร์เบลหรือการคุมท่าเหนือศีรษะ",
       },
     ],
   },
   {
-    id: "targetWorkoutId",
-    title: "อยากโยงไปที่ workout ไหนไหม",
-    description: "ถ้ามี Open workout ที่อยากแก้ทาง ระบบจะให้น้ำหนักเพิ่มกับ pathway ที่เกี่ยวข้อง",
+    id: "experienceLevel",
+    title: "อยากเริ่มประมาณไหน",
+    description: "เลือกแบบที่ใกล้กับตัวเองที่สุด เพื่อให้ระบบไม่พาไปเร็วเกิน",
     options: [
       {
-        value: "none",
-        label: "ยังไม่เจาะ workout",
-        description: "ขอเริ่มจาก skill gap ก่อน",
+        value: "foundation",
+        label: KICK_START_LEVEL_LABELS.foundation,
+        description: "ขอเริ่มเบา ๆ ก่อน เอาแบบเข้าใจและทำซ้ำได้จริง",
       },
       {
-        value: "26.1",
-        label: "Open 26.1",
-        description: "squat endurance, wall-ball efficiency, box turnover",
+        value: "building",
+        label: KICK_START_LEVEL_LABELS.building,
+        description: "มีพื้นฐานบ้างแล้ว แต่อยากได้ลำดับฝึกที่ชัดขึ้น",
       },
       {
-        value: "26.2",
-        label: "Open 26.2",
-        description: "overhead stability, pulling progression, grip management",
-      },
-    ],
-  },
-  {
-    id: "currentState",
-    title: "ตอนนี้คุณอยู่ระดับไหนกับจุดที่ติด",
-    description: "ใช้ level นี้เพื่อเลือก movement ถัดไปให้ไม่เร็วเกินไป",
-    options: [
-      {
-        value: "cannotDoYet",
-        label: USER_STATE_LABELS.cannotDoYet,
-        description: "ยังต้องย้อนกลับไปสร้างฐานหรือ regressions",
-      },
-      {
-        value: "canDoBasic",
-        label: USER_STATE_LABELS.canDoBasic,
-        description: "ทำ basic version ได้ แต่ยังไม่ stable ใน volume",
-      },
-      {
-        value: "buildPerformance",
-        label: USER_STATE_LABELS.buildPerformance,
-        description: "ทำได้แล้ว แต่อยากใช้ได้จริงใน workout และ fatigue",
-      },
-    ],
-  },
-  {
-    id: "preference",
-    title: "ตอนนี้อยากได้ผลลัพธ์แบบไหนที่สุด",
-    description: "เลือก objective หลัก เพื่อให้คำแนะนำ practical มากขึ้น",
-    options: [
-      {
-        value: "consistency",
-        label: "ทำให้เสถียรขึ้น",
-        description: "อยากให้ฟอร์มและ pacing ไม่พังง่าย",
-      },
-      {
-        value: "skill",
-        label: "ปลดล็อก skill ถัดไป",
-        description: "อยากเร่ง progression แบบมีเหตุผล",
-      },
-      {
-        value: "open-ready",
-        label: "พร้อมใช้ใน Open",
-        description: "โฟกัสว่าทำยังไงให้เอาไปใช้ใน workout จริงได้",
+        value: "workout",
+        label: KICK_START_LEVEL_LABELS.workout,
+        description: "อยากให้สิ่งที่ฝึกเริ่มเอาไปใช้ในคลาสได้จริง",
       },
     ],
   },
@@ -245,146 +203,146 @@ export const RECOMMENDATION_QUESTIONS: RecommendationQuestion[] = [
 export const READINESS_PROFILES: ReadinessProfile[] = [
   {
     slug: "open-26-1",
-    title: "Readiness for Open 26.1",
-    description: "เช็กว่าคุณพร้อมแค่ไหนสำหรับ squat endurance, wall-ball rhythm, และการคุม pace ใน 26.1",
+    title: "เช็กความพร้อม Open 26.1",
+    description: "เช็กว่าคุณพร้อมแค่ไหนสำหรับความอึดของขา จังหวะวอลล์บอล และการคุมเพซใน 26.1",
     relatedWorkoutId: "26.1",
     movementSlugs: ["air-squat", "wall-ball", "box-jump-over", "thruster"],
     pathwaySlugs: ["squat-path", "open-engine-path"],
-    keyDemands: ["squat endurance", "wall-ball efficiency", "cyclical breathing", "jump-over rhythm"],
+    keyDemands: ["ความอึดของขา", "จังหวะวอลล์บอล", "จังหวะหายใจ", "จังหวะข้ามกล่อง"],
     openInsight:
-      "ใน 26.1 คนจำนวนมากไม่ได้แพ้ movement ยาก แต่แพ้การเปิดเร็วเกินไปที่ wall ball และฟื้นตัวไม่ทันหน้ากล่อง",
+      "ใน 26.1 หลายคนไม่ได้แพ้ท่ายาก แต่แพ้การเปิดเร็วเกินไปที่วอลล์บอล แล้วฟื้นตัวไม่ทันตอนเข้ากล่อง",
     questions: [
       {
         id: "squat-volume",
-        demandLabel: "squat endurance",
-        prompt: "ตอน squat หรือ wall ball rep สูง ขายังรักษาทรงและ depth ได้แค่ไหน",
+        demandLabel: "ความอึดของขา",
+        prompt: "ตอนทำสควอตหรือวอลล์บอลเยอะ ๆ ขายังคุมทรงและลงได้มาตรฐานแค่ไหน",
         options: SCORE_OPTIONS,
       },
       {
         id: "wall-ball-rhythm",
-        demandLabel: "wall-ball efficiency",
-        prompt: "คุณคุม target line และรับลูกกลับลง squat ได้สม่ำเสมอแค่ไหน",
+        demandLabel: "จังหวะวอลล์บอล",
+        prompt: "คุณโยน รับ แล้วลงสควอตต่อได้ลื่นแค่ไหน",
         options: SCORE_OPTIONS,
       },
       {
         id: "breathing-control",
-        demandLabel: "cyclical breathing",
-        prompt: "เมื่อหัวใจขึ้นสูง คุณยังคุม breathing rhythm และกลับเข้าชุดได้ไหม",
+        demandLabel: "จังหวะหายใจ",
+        prompt: "เมื่อเหนื่อยมากแล้ว คุณยังคุมลมหายใจและกลับเข้าชุดได้ไหม",
         options: SCORE_OPTIONS,
       },
       {
         id: "box-turnover",
-        demandLabel: "jump-over rhythm",
-        prompt: "box jump-over หรือ step-over ของคุณยังมี turnover ดีเมื่อเหนื่อยไหม",
+        demandLabel: "จังหวะข้ามกล่อง",
+        prompt: "พอเหนื่อยแล้ว คุณยังข้ามกล่องได้ต่อเนื่องโดยไม่สะดุดไหม",
         options: SCORE_OPTIONS,
       },
     ],
   },
   {
     slug: "open-26-2",
-    title: "Readiness for Open 26.2",
-    description: "เช็กความพร้อมสำหรับ overhead lunge, pulling ladder, และ grip management ใน 26.2",
+    title: "เช็กความพร้อม Open 26.2",
+    description: "เช็กความพร้อมสำหรับลันจ์เหนือศีรษะ ท่าดึงที่ยากขึ้น และการคุมแรงมือใน 26.2",
     relatedWorkoutId: "26.2",
     movementSlugs: ["db-walking-lunge", "kipping-pull-up", "chest-to-bar", "kipping-muscle-up"],
     pathwaySlugs: ["pulling-path", "hanging-core-path"],
-    keyDemands: ["overhead stability", "advanced pulling", "grip management", "transition efficiency"],
+    keyDemands: ["การคุมท่าเหนือศีรษะ", "ท่าดึงขั้นต่อไป", "การคุมแรงมือ", "การเปลี่ยนท่า"],
     openInsight:
-      "ใน 26.2 จุดตัดเกมมักไม่ใช่แค่ muscle-up แต่คือ overhead lunge และ grip ที่ทำให้ pulling quality ตกก่อนถึงรอบท้าย",
+      "ใน 26.2 จุดที่คนพังบ่อยไม่ได้มีแค่มัสเซิลอัป แต่รวมถึงลันจ์เหนือศีรษะและแรงมือที่ตกก่อนถึงรอบท้าย",
     questions: [
       {
         id: "overhead-control",
-        demandLabel: "overhead stability",
-        prompt: "เวลาเดิน lunge ใต้ fatigue คุณยังคุม lockout และ midline ได้แค่ไหน",
+        demandLabel: "การคุมท่าเหนือศีรษะ",
+        prompt: "เวลาเดินลันจ์ตอนเหนื่อย คุณยังคุมแขนล็อกและลำตัวได้แค่ไหน",
         options: SCORE_OPTIONS,
       },
       {
         id: "pulling-ladder",
-        demandLabel: "advanced pulling",
-        prompt: "pull-up → chest-to-bar → muscle-up progression ของคุณพร้อมแค่ไหนตอนนี้",
+        demandLabel: "ท่าดึงขั้นต่อไป",
+        prompt: "ตอนนี้พื้นฐานของคุณพร้อมต่อยอดจาก pull-up ไป chest-to-bar หรือ muscle-up แค่ไหน",
         options: SCORE_OPTIONS,
       },
       {
         id: "grip-fatigue",
-        demandLabel: "grip management",
-        prompt: "grip ของคุณอยู่ได้นานพอสำหรับหลายรอบบน rig ไหม",
+        demandLabel: "การคุมแรงมือ",
+        prompt: "แรงมือของคุณทนพอสำหรับการอยู่บนบาร์หลายรอบไหม",
         options: SCORE_OPTIONS,
       },
       {
         id: "transition-speed",
-        demandLabel: "transition efficiency",
-        prompt: "คุณกลับจาก dumbbell เข้าบาร์ได้เร็วและไม่เสียหายใจมากแค่ไหน",
+        demandLabel: "การเปลี่ยนท่า",
+        prompt: "คุณเปลี่ยนจากดัมเบลกลับขึ้นบาร์ได้เร็วแค่ไหนโดยไม่เสียจังหวะมาก",
         options: SCORE_OPTIONS,
       },
     ],
   },
   {
     slug: "squat-capacity",
-    title: "Squat Capacity Check",
-    description: "ใช้เช็ก readiness ของคนที่กำลังจะ build squat volume, wall ball, หรือ thruster ให้ใช้ได้จริง",
+    title: "เช็กพื้นฐานสควอต",
+    description: "ใช้ดูว่าพื้นฐานสควอต วอลล์บอล และทรัสเตอร์ของคุณแน่นพอจะต่อยอดหรือยัง",
     movementSlugs: ["air-squat", "goblet-squat", "front-squat", "thruster"],
     pathwaySlugs: ["squat-path", "open-engine-path"],
-    keyDemands: ["mechanics under fatigue", "torso position", "breathing rhythm", "squat recovery"],
+    keyDemands: ["ทรงท่าเวลาเหนื่อย", "การคุมลำตัว", "จังหวะหายใจ", "การฟื้นตัวระหว่างเซ็ต"],
     openInsight:
-      "ถ้า squat pattern เริ่มพังเมื่อเหนื่อย คุณมักจะเห็นผลเสียต่อ wall ball, thruster, และการเปลี่ยน movement ใน Open ทันที",
+      "ถ้าทรงสควอตเริ่มพังตอนเหนื่อย วอลล์บอล ทรัสเตอร์ และการเปลี่ยนท่ามักจะเสียตามทันที",
     questions: [
       {
         id: "depth-control",
-        demandLabel: "mechanics under fatigue",
-        prompt: "คุณยังคุม depth และ balance ได้ไหมเมื่อ volume เริ่มสูง",
+        demandLabel: "ทรงท่าเวลาเหนื่อย",
+        prompt: "เมื่อจำนวนครั้งเริ่มเยอะ คุณยังคุมทรงและบาลานซ์ได้ไหม",
         options: SCORE_OPTIONS,
       },
       {
         id: "torso-position",
-        demandLabel: "torso position",
-        prompt: "อกและ brace ของคุณยังนิ่งเวลาออกจากก้นล่างสุดไหม",
+        demandLabel: "การคุมลำตัว",
+        prompt: "อกและลำตัวของคุณยังนิ่งตอนลุกจากก้นล่างสุดไหม",
         options: SCORE_OPTIONS,
       },
       {
         id: "breathing-rhythm",
-        demandLabel: "breathing rhythm",
-        prompt: "คุณมีจังหวะหายใจที่ช่วยให้กลับเข้าชุดได้หรือยัง",
+        demandLabel: "จังหวะหายใจ",
+        prompt: "คุณมีจังหวะหายใจที่ช่วยให้กลับเข้าชุดต่อได้หรือยัง",
         options: SCORE_OPTIONS,
       },
       {
         id: "recovery-between-sets",
-        demandLabel: "squat recovery",
-        prompt: "หลังเซ็ตยาว คุณกลับมาทำงานต่อได้เร็วแค่ไหนโดยไม่เสียทรง",
+        demandLabel: "การฟื้นตัวระหว่างเซ็ต",
+        prompt: "หลังเซ็ตยาว คุณกลับมาทำต่อได้เร็วแค่ไหนโดยที่ทรงยังไม่พัง",
         options: SCORE_OPTIONS,
       },
     ],
   },
   {
     slug: "pulling-control",
-    title: "Pulling Control Check",
-    description: "เช็กว่าพื้นฐานของคุณพร้อมพอสำหรับ pull-up volume, chest-to-bar, และ progression ต่อไปหรือยัง",
+    title: "เช็กพื้นฐานท่าดึง",
+    description: "ใช้ดูว่าพื้นฐานของคุณพร้อมพอสำหรับ pull-up, chest-to-bar และท่าต่อไปหรือยัง",
     movementSlugs: ["ring-row", "strict-pull-up", "kipping-pull-up", "chest-to-bar"],
     pathwaySlugs: ["pulling-path", "hanging-core-path"],
-    keyDemands: ["strict pulling base", "kip timing", "hollow control", "grip durability"],
+    keyDemands: ["แรงดึงแบบ strict", "จังหวะคิป", "การคุมลำตัว", "ความทนของแรงมือ"],
     openInsight:
-      "athlete หลายคนคิดว่าติดที่ skill แต่จริง ๆ ติดที่ strict base, hollow position, และ grip durability ที่ยังไม่พอ",
+      "หลายคนคิดว่าตัวเองติดที่สกิล แต่จริง ๆ มักติดที่แรงดึงพื้นฐาน การคุมลำตัว และแรงมือที่ยังไม่พอ",
     questions: [
       {
         id: "strict-base",
-        demandLabel: "strict pulling base",
-        prompt: "strict pulling strength ของคุณเพียงพอที่จะรองรับ volume ที่อยากทำไหม",
+        demandLabel: "แรงดึงแบบ strict",
+        prompt: "แรงดึงแบบ strict ของคุณพอรองรับจำนวนครั้งที่อยากฝึกไหม",
         options: SCORE_OPTIONS,
       },
       {
         id: "kip-timing",
-        demandLabel: "kip timing",
-        prompt: "คุณเชื่อม hollow-arch กับแรงดึงได้แม่นแค่ไหน",
+        demandLabel: "จังหวะคิป",
+        prompt: "คุณเชื่อม hollow-arch กับแรงดึงได้ลื่นแค่ไหน",
         options: SCORE_OPTIONS,
       },
       {
         id: "midline-control",
-        demandLabel: "hollow control",
+        demandLabel: "การคุมลำตัว",
         prompt: "เมื่อเริ่มเหนื่อย คุณยังคุมตำแหน่งตัวบนบาร์ได้ไหม",
         options: SCORE_OPTIONS,
       },
       {
         id: "grip-durability",
-        demandLabel: "grip durability",
-        prompt: "grip ของคุณยังคงคุณภาพ rep ได้หลังหลายเซ็ตไหม",
+        demandLabel: "ความทนของแรงมือ",
+        prompt: "แรงมือของคุณยังคงคุณภาพของแต่ละครั้งได้หลังหลายเซ็ตไหม",
         options: SCORE_OPTIONS,
       },
     ],
@@ -396,19 +354,19 @@ export const READINESS_BAND_META: Record<
   { label: string; bg: string; text: string; border: string }
 > = {
   "needs-foundation": {
-    label: "Foundation First",
+    label: "ควรปูพื้นก่อน",
     bg: "#fee2e2",
     text: "#991b1b",
     border: "#fecaca",
   },
   building: {
-    label: "Building",
+    label: "กำลังต่อยอด",
     bg: "#fef3c7",
     text: "#92400e",
     border: "#fde68a",
   },
   "ready-to-push": {
-    label: "Ready to Push",
+    label: "พร้อมขยับต่อ",
     bg: "#dcfce7",
     text: "#166534",
     border: "#86efac",
@@ -427,132 +385,69 @@ export function getReadinessProfilesForMovement(slug: string) {
   return READINESS_PROFILES.filter(profile => profile.movementSlugs.includes(slug));
 }
 
-function getPathwayScoreBoosts(answers: RecommendationAnswers) {
-  const scores = new Map<string, number>(SKILL_PATHWAYS.map(pathway => [pathway.slug, 0]));
+function getKickStartState(level: KickStartLevel): UserStateKey {
+  if (level === "foundation") return "cannotDoYet";
+  if (level === "building") return "canDoBasic";
+  return "buildPerformance";
+}
 
-  scores.set(
-    answers.blockerPathwaySlug,
-    (scores.get(answers.blockerPathwaySlug) ?? 0) + 6,
-  );
-
-  if (answers.targetWorkoutId !== "none") {
-    SKILL_PATHWAYS.filter(pathway => pathway.workoutIds.includes(answers.targetWorkoutId)).forEach(pathway => {
-      scores.set(pathway.slug, (scores.get(pathway.slug) ?? 0) + 4);
-    });
-
-    if (answers.targetWorkoutId === "26.1") {
-      ["squat-path", "open-engine-path"].forEach(slug => {
-        scores.set(slug, (scores.get(slug) ?? 0) + 1);
-      });
-    }
-
-    if (answers.targetWorkoutId === "26.2") {
-      ["pulling-path", "hanging-core-path"].forEach(slug => {
-        scores.set(slug, (scores.get(slug) ?? 0) + 1);
-      });
-    }
-  }
-
-  if (answers.preference === "consistency") {
-    ["squat-path", "open-engine-path", "jump-rope-path"].forEach(slug => {
-      scores.set(slug, (scores.get(slug) ?? 0) + 2);
-    });
-  }
-
-  if (answers.preference === "skill") {
-    ["pulling-path", "hanging-core-path", "barbell-olympic-path"].forEach(slug => {
-      scores.set(slug, (scores.get(slug) ?? 0) + 2);
-    });
-  }
-
-  if (answers.preference === "open-ready") {
-    SKILL_PATHWAYS.filter(pathway => pathway.workoutIds.length > 0).forEach(pathway => {
-      scores.set(pathway.slug, (scores.get(pathway.slug) ?? 0) + 2);
-    });
-  }
-
-  if (answers.currentState === "cannotDoYet") {
-    ["squat-path", "pulling-path", "open-engine-path"].forEach(slug => {
-      scores.set(slug, (scores.get(slug) ?? 0) + 1);
-    });
-  }
-
-  if (answers.currentState === "buildPerformance") {
-    ["pulling-path", "hanging-core-path", "barbell-olympic-path"].forEach(slug => {
-      scores.set(slug, (scores.get(slug) ?? 0) + 1);
-    });
-  }
-
-  return scores;
+function getKickStartPathwaySlug(focus: KickStartFocus) {
+  if (focus === "start-here") return "squat-path";
+  return focus;
 }
 
 function selectRecommendedPathway(answers: RecommendationAnswers): SkillPathway {
-  const scores = getPathwayScoreBoosts(answers);
-  const sorted = [...scores.entries()].sort((a, b) => b[1] - a[1]);
-  const top = sorted[0]?.[0] ?? answers.blockerPathwaySlug;
-  return getPathwayBySlug(top) ?? SKILL_PATHWAYS[0];
+  return getPathwayBySlug(getKickStartPathwaySlug(answers.starterFocus)) ?? SKILL_PATHWAYS[0];
 }
 
-function pickMovementsForPathway(pathway: SkillPathway, state: UserStateKey) {
+function pickMovementsForPathway(pathway: SkillPathway, level: KickStartLevel) {
   const movements = getPathwayMovements(pathway);
   if (movements.length <= 2) return movements.map(movement => movement.slug);
 
-  if (state === "cannotDoYet") {
+  if (level === "foundation") {
     return movements.slice(0, 2).map(movement => movement.slug);
   }
 
-  if (state === "canDoBasic") {
-    const start = Math.max(0, Math.floor(movements.length / 2) - 1);
+  if (level === "building") {
+    const start = Math.min(Math.max(0, Math.floor(movements.length / 2) - 1), Math.max(0, movements.length - 2));
     return movements.slice(start, start + 2).map(movement => movement.slug);
   }
 
   return movements.slice(-2).map(movement => movement.slug);
 }
 
-function getSuggestedReadinessProfileSlug(pathwaySlug: string, workoutId: RecommendationAnswers["targetWorkoutId"]) {
-  if (workoutId === "26.1") return "open-26-1";
-  if (workoutId === "26.2") return "open-26-2";
+function getSuggestedReadinessProfileSlug(pathwaySlug: string, focus: KickStartFocus) {
+  if (pathwaySlug === "barbell-olympic-path") return "open-26-2";
+  if (focus === "start-here") return "squat-capacity";
   if (["squat-path", "open-engine-path"].includes(pathwaySlug)) return "squat-capacity";
   return "pulling-control";
 }
 
-function buildOpenInsight(pathway: SkillPathway, targetWorkoutId: RecommendationAnswers["targetWorkoutId"]) {
-  if (targetWorkoutId !== "none") {
-    const workout = getWorkoutById(targetWorkoutId);
-    if (workout?.readiness?.commonStickingPoints?.[0]) {
-      return `โยงกับ Open ${targetWorkoutId}: ${workout.readiness.commonStickingPoints[0]}`;
-    }
-  }
-
+function buildGoDeeperInsight(pathway: SkillPathway) {
   if (pathway.workoutIds[0]) {
-    const workout = getWorkoutById(pathway.workoutIds[0]);
-    if (workout?.readiness?.keyDemands?.[0]) {
-      return `pathway นี้เชื่อมกับ Open ${workout.id} และ demand หลักคือ ${workout.readiness.keyDemands[0]}`;
-    }
+    return "ถ้าอยากลงลึกกว่านี้ ให้เปิดเส้นทางฝึกเต็มก่อน แล้วค่อยเช็กความพร้อมหรืออ่านต่อจาก CrossFit.com ภายหลัง";
   }
 
-  return undefined;
+  return "ถ้าอยากลงลึกกว่านี้ ให้เปิดเส้นทางฝึกเต็มก่อน แล้วค่อยต่อด้วยเช็กความพร้อมหรือบทความจาก CrossFit.com ภายหลัง";
 }
 
 function describeReason(pathway: SkillPathway, answers: RecommendationAnswers) {
-  const reasons = [
-    `เริ่มจาก ${pathway.titleTH} เพราะตรงกับ blocker ที่คุณเลือกมากที่สุด`,
-  ];
+  const reasons = [`เริ่มจาก ${pathway.titleTH} เพราะใกล้กับจุดที่คุณอยากแก้มากที่สุด`];
 
-  if (answers.targetWorkoutId !== "none") {
-    reasons.push(`pathway นี้เชื่อมกับ Open ${answers.targetWorkoutId} ได้โดยตรงหรือใกล้เคียงที่สุด`);
+  if (answers.starterFocus === "start-here") {
+    reasons.push("เหมาะกับคนที่ยังไม่แน่ใจว่าจะเริ่มตรงไหน และอยากปูพื้นให้กว้างก่อน");
   }
 
-  if (answers.preference === "consistency") {
-    reasons.push("ลำดับ movement นี้จะช่วยให้คุณทำ pattern เดิมได้เสถียรขึ้นก่อนเร่ง skill ถัดไป");
+  if (answers.experienceLevel === "foundation") {
+    reasons.push("เราเลือกท่าช่วงต้นเพื่อให้เริ่มได้แบบไม่หนักเกินไปและทำซ้ำได้จริง");
   }
 
-  if (answers.preference === "skill") {
-    reasons.push("คำแนะนำนี้เน้น progression ที่ใกล้กับ skill เป้าหมายแบบไม่กระโดดขั้นเกินไป");
+  if (answers.experienceLevel === "building") {
+    reasons.push("เราเลือกท่าช่วงกลางเพื่อช่วยต่อยอดจากพื้นฐานที่คุณมีอยู่แล้ว");
   }
 
-  if (answers.preference === "open-ready") {
-    reasons.push("คำแนะนำนี้คัด movement ที่ถ่ายโอนไปใช้ใน workout จริงได้เร็วกว่าแบบอ่านเฉย ๆ");
+  if (answers.experienceLevel === "workout") {
+    reasons.push("เราเลือกท่าที่เริ่มเอาไปใช้ในคลาสได้มากขึ้น แต่ยังไม่ข้ามขั้น");
   }
 
   return reasons.slice(0, 3);
@@ -560,7 +455,7 @@ function describeReason(pathway: SkillPathway, answers: RecommendationAnswers) {
 
 function getCoachNote(movementSlug: string, state: UserStateKey) {
   const movement = getMovementBySlug(movementSlug);
-  if (!movement) return "เริ่มจาก quality reps ที่ทำซ้ำได้จริง แล้วค่อยเพิ่ม volume";
+  if (!movement) return "เริ่มจากจำนวนครั้งที่คุมคุณภาพได้จริง แล้วค่อยเพิ่มทีละนิด";
   const detail = getMovementDetail(movementSlug);
   const guidance = getResolvedUserStateGuidance(movement as MovementCatalogEntry, detail).find(item => item.key === state);
   return guidance?.data.summary ?? `โฟกัส ${movement.name} ให้คุมมาตรฐานได้จริงก่อนเพิ่มความยาก`;
@@ -568,26 +463,25 @@ function getCoachNote(movementSlug: string, state: UserStateKey) {
 
 export function buildRecommendation(answers: RecommendationAnswers): RecommendationResult {
   const pathway = selectRecommendedPathway(answers);
-  const movementSlugs = pickMovementsForPathway(pathway, answers.currentState);
+  const state = getKickStartState(answers.experienceLevel);
+  const movementSlugs = pickMovementsForPathway(pathway, answers.experienceLevel);
   const focusMovementSlug = movementSlugs[0] ?? pathway.movementSlugs[0];
-  const readinessProfileSlug = getSuggestedReadinessProfileSlug(pathway.slug, answers.targetWorkoutId);
-  const stateLabel = USER_STATE_LABELS[answers.currentState];
+  const readinessProfileSlug = getSuggestedReadinessProfileSlug(pathway.slug, answers.starterFocus);
 
   return {
     pathwaySlug: pathway.slug,
     movementSlugs,
-    targetWorkoutId: answers.targetWorkoutId === "none" ? undefined : answers.targetWorkoutId,
     readinessProfileSlug,
-    summary: `${pathway.titleTH} เหมาะสุดสำหรับคุณตอนนี้ เพราะคุณอยู่ระดับ “${stateLabel}” และควรเดินตามลำดับที่ช่วยแก้ bottleneck หลักก่อน`,
+    summary: `${pathway.titleTH} น่าจะเหมาะกับคุณที่สุดตอนนี้ เพราะตรงกับสิ่งที่คุณอยากโฟกัส และไม่ยากเกินระดับที่เลือก`,
     reasons: describeReason(pathway, answers),
-    coachNote: getCoachNote(focusMovementSlug, answers.currentState),
+    coachNote: getCoachNote(focusMovementSlug, state),
     caution:
-      answers.currentState === "cannotDoYet"
-        ? "ยังไม่ต้องรีบไล่ movement ปลายทาง ให้สะสมฐานและ quality reps ก่อน"
-        : answers.currentState === "canDoBasic"
-          ? "อย่าเพิ่ม volume เร็วเกินไป ถ้ายังเสีย rhythm หรือ form เมื่อเหนื่อย"
-          : "ตอนนี้ให้วัดที่ efficiency และ rest time ไม่ใช่แค่ทำได้หรือไม่ได้",
-    openInsight: buildOpenInsight(pathway, answers.targetWorkoutId),
+      answers.experienceLevel === "foundation"
+        ? "ยังไม่ต้องรีบไปท่าปลายทาง เอาให้พื้นฐานนิ่งก่อน"
+        : answers.experienceLevel === "building"
+          ? "ยังไม่ต้องรีบเพิ่มจำนวน ถ้าพอเหนื่อยแล้วจังหวะเริ่มหลุด"
+          : "ตอนนี้ให้ดูว่าทำได้ลื่นขึ้นและฟื้นไวขึ้น ไม่ใช่แค่ทำผ่านอย่างเดียว",
+    openInsight: buildGoDeeperInsight(pathway),
   };
 }
 
@@ -599,14 +493,14 @@ function sliceReadinessMovements(profile: ReadinessProfile, band: ReadinessBand)
 
 function buildReadinessSummary(profile: ReadinessProfile, band: ReadinessBand) {
   if (band === "needs-foundation") {
-    return `ตอนนี้ ${profile.title} ยังควรเริ่มจากฐานก่อน โดยเฉพาะ demand ที่ให้คะแนนต่ำสุด`;
+    return `ตอนนี้ ${profile.title} ยังควรปูพื้นก่อน โดยเฉพาะจุดที่คุณให้คะแนนต่ำสุด`;
   }
 
   if (band === "building") {
-    return `คุณมีฐานพอสมควรแล้ว แต่ยังควรจัดลำดับการฝึกให้แม่นก่อนเร่ง volume หรือ intensity`;
+    return "คุณมีพื้นฐานพอสมควรแล้ว แต่ยังควรจัดลำดับการฝึกให้แม่นก่อนเร่งจำนวนหรือความหนัก";
   }
 
-  return `คุณอยู่ในจุดที่พร้อมพัฒนา performance ต่อได้ แต่ยังควรคุมคุณภาพ movement และการฟื้นตัวระหว่างเซ็ต`;
+  return "คุณอยู่ในจุดที่พร้อมขยับต่อได้ แต่ยังควรคุมคุณภาพท่าและการฟื้นตัวระหว่างเซ็ต";
 }
 
 export function evaluateReadinessProfile(

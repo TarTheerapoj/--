@@ -31,16 +31,16 @@ export default async function PathwayDetailPage({
         <div className="absolute top-0 left-0 right-0 h-0.5" style={{ backgroundColor: pathway.accent }} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
           <div className="flex items-center gap-1.5 text-[10px] text-white/40 font-bold uppercase tracking-widest mb-5 flex-wrap">
-            <Link href="/movements" className="hover:text-white/70 transition-colors">Movement Library</Link>
+            <Link href="/movements" className="hover:text-white/70 transition-colors">คลังท่า</Link>
             <ChevronRight className="w-3 h-3" />
-            <Link href="/pathways" className="hover:text-white/70 transition-colors">Pathways</Link>
+            <Link href="/pathways" className="hover:text-white/70 transition-colors">เส้นทางฝึก</Link>
             <ChevronRight className="w-3 h-3" />
             <span style={{ color: pathway.accent }}>{pathway.title}</span>
           </div>
           <div className="flex items-start justify-between gap-6 flex-wrap">
             <div className="max-w-3xl">
               <p className="text-[10px] font-black tracking-[0.25em] uppercase mb-2" style={{ color: pathway.accent }}>
-                Skill Pathway
+                เส้นทางฝึก
               </p>
               <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
                 {pathway.title}
@@ -53,7 +53,7 @@ export default async function PathwayDetailPage({
             <div className="flex gap-6">
               <div className="text-right">
                 <p className="text-2xl font-black" style={{ color: pathway.accent }}>{movements.length}</p>
-                <p className="text-[10px] text-white/30 uppercase tracking-widest mt-0.5">Steps</p>
+                <p className="text-[10px] text-white/30 uppercase tracking-widest mt-0.5">ขั้น</p>
               </div>
             </div>
           </div>
@@ -63,13 +63,13 @@ export default async function PathwayDetailPage({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
           <section className="bg-white rounded-xl border border-gray-200 p-6">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4">Who this is for</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4">เหมาะกับใคร</p>
             <p className="text-sm text-gray-700 leading-relaxed">{pathway.whoItsFor}</p>
           </section>
 
           <section className="bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex items-center gap-3 mb-5">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Progression Ladder</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">ลำดับการฝึก</p>
               <div className="flex-1 h-px bg-gray-200" />
             </div>
             <PathwayLadder pathway={pathway} />
@@ -78,12 +78,12 @@ export default async function PathwayDetailPage({
 
         <div className="space-y-6">
           <section className="bg-white rounded-xl border border-gray-200 p-5">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">Pathway actions</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">ทางลัดหน้านี้</p>
             <PathwayQuickActions slug={pathway.slug} />
           </section>
 
           <section className="bg-white rounded-xl border border-gray-200 p-5">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">Focus of this pathway</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">โฟกัสของเส้นทางนี้</p>
             <ul className="space-y-2">
               {pathway.focus.map(item => (
                 <li key={item} className="text-sm text-gray-600 flex items-start gap-2">
@@ -96,7 +96,7 @@ export default async function PathwayDetailPage({
 
           {relatedWorkouts.length > 0 && (
             <section className="bg-white rounded-xl border border-gray-200 p-5">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">Related Workouts</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">เวิร์กเอาท์ที่เกี่ยวข้อง</p>
               <div className="space-y-2">
                 {relatedWorkouts.map(workout => (
                   <Link
@@ -116,7 +116,7 @@ export default async function PathwayDetailPage({
           )}
 
           <section className="bg-white rounded-xl border border-gray-200 p-5">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">Step summary</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">สรุปลำดับท่า</p>
             <div className="space-y-2">
               {movements.map((movement, index) => (
                 <Link

@@ -419,13 +419,13 @@ function WorkoutReadinessPanel({ workout }: { workout: typeof WORKOUTS[0] }) {
   return (
     <div className="rounded-xl border border-border/50 p-5 space-y-5">
       <div className="flex items-center gap-3">
-        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Workout Readiness</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">เช็กความพร้อมสำหรับเวิร์กเอาท์นี้</p>
         <div className="flex-1 h-px bg-border/50" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">Key skill demands</p>
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">สิ่งที่ต้องมี</p>
           <div className="flex flex-wrap gap-1.5">
             {workout.readiness.keyDemands.map(demand => (
               <span key={demand} className="text-[10px] px-2 py-1 rounded-md bg-secondary/60 text-foreground/70 border border-border/40 font-bold">
@@ -436,7 +436,7 @@ function WorkoutReadinessPanel({ workout }: { workout: typeof WORKOUTS[0] }) {
         </div>
 
         <div>
-          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">Where athletes get stuck</p>
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">จุดที่คนมักติด</p>
           <ul className="space-y-2">
             {workout.readiness.commonStickingPoints.map(point => (
               <li key={point} className="text-xs text-muted-foreground leading-relaxed flex items-start gap-2">
@@ -448,14 +448,14 @@ function WorkoutReadinessPanel({ workout }: { workout: typeof WORKOUTS[0] }) {
         </div>
 
         <div>
-          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">If you are blocked here, train this first</p>
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">ถ้าติดตรงนี้ ให้ฝึกสิ่งนี้ก่อน</p>
           <MovementSlugLinks slugs={workout.readiness.trainFirstMovementSlugs} />
         </div>
       </div>
 
       {relatedPathways.length > 0 && (
         <div className="pt-1">
-          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">Related pathways</p>
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">เส้นทางฝึกที่เกี่ยวข้อง</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {relatedPathways.map(pathway => (
               <Link
@@ -640,7 +640,7 @@ export default function WorkoutsPage() {
             <span style={{ color: "#9BEC00" }}>Workouts</span> วิเคราะห์เวิร์คเอาท์
           </h1>
           <p className="text-white/50 text-sm mt-2">
-            รายละเอียดและสถิติแต่ละ Workout ใน CrossFit Open 2026
+            รายละเอียดและสถิติของแต่ละเวิร์กเอาท์ใน CrossFit Open 2026
           </p>
           <div className="mt-4 flex gap-3 flex-wrap">
             <Link
@@ -648,13 +648,13 @@ export default function WorkoutsPage() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black transition-all hover:opacity-90"
               style={{ backgroundColor: "#9BEC00", color: "#111" }}
             >
-              ดู Readiness Checks
+              ดูหน้าเช็กความพร้อม
             </Link>
             <Link
               href="/recommend"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black border border-white/15 text-white hover:border-white/25 transition-all"
             >
-              Recommendation Builder
+              ดูจุดเริ่มต้น
             </Link>
           </div>
         </div>

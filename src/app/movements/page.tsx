@@ -13,7 +13,6 @@ import {
   type DifficultyLevel,
 } from "@/lib/data/movements";
 import { PathwayPreviewCard } from "@/components/movements/LearningUI";
-import { RecommendationResultCard, SavedProgressPanel } from "@/components/V3Widgets";
 import { SKILL_PATHWAYS } from "@/lib/pathways";
 
 const ACCENT = "#9BEC00";
@@ -36,7 +35,7 @@ const SORT_OPTIONS: { key: SortOption; label: string }[] = [
   { key: "name-asc",       label: "A → Z" },
   { key: "difficulty-asc", label: "ง่าย → ยาก" },
   { key: "difficulty-desc",label: "ยาก → ง่าย" },
-  { key: "detail-first",   label: "มี Detail ก่อน" },
+  { key: "detail-first",   label: "มีรายละเอียดก่อน" },
 ];
 
 function sortMovements(list: MovementCatalogEntry[], sort: SortOption): MovementCatalogEntry[] {
@@ -227,7 +226,7 @@ function MindMapView({
                 className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                 style={{ backgroundColor: `${catColor}20`, color: catColor }}
               >
-                {totalInCat} movements
+                {totalInCat} ท่า
               </span>
             </div>
 
@@ -399,10 +398,10 @@ export default function MovementsPage() {
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
               <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
-                <span style={{ color: ACCENT }}>Movement</span> Library
+                <span style={{ color: ACCENT }}>คลังท่า</span>
               </h1>
               <p className="text-white/40 text-sm mt-1.5 max-w-lg leading-relaxed">
-                จาก movement library ไปสู่ guided learning system — ค้นหาท่า, เข้าใจสิ่งที่ติด, แล้วรู้ว่าควรฝึกอะไรต่อ
+                จากคลังท่าไปสู่การฝึกแบบมีลำดับ ค้นหาท่า เข้าใจจุดที่ยังติด แล้วรู้ว่าควรฝึกอะไรต่อ
               </p>
               <div className="mt-4 flex gap-3 flex-wrap">
                 <Link
@@ -411,26 +410,26 @@ export default function MovementsPage() {
                   style={{ backgroundColor: ACCENT, color: "#111" }}
                 >
                   <Zap className="w-3.5 h-3.5" />
-                  ไม่รู้จะเริ่มที่ไหน? Start Here →
+                  ยังไม่รู้จะเริ่มตรงไหน? ดูจุดเริ่มต้น →
                 </Link>
                 <Link
                   href="/pathways"
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black border border-white/15 text-white hover:border-white/25 transition-all"
                 >
                   <GitBranch className="w-3.5 h-3.5" />
-                  ดู Skill Pathways
+                  ดูเส้นทางฝึก
                 </Link>
               </div>
             </div>
             <div className="flex gap-5">
               {[
-                { label: "Movements",   value: ALL_MOVEMENTS.length },
-                { label: "มี Detail",   value: ALL_MOVEMENTS.filter(m => "shortDesc" in m && !!(m as {shortDesc?:string}).shortDesc).length },
-                { label: "Pathways",    value: SKILL_PATHWAYS.length },
-              ].map(({ label, value }) => (
-                <div key={label} className="text-right">
-                  <p className="text-2xl font-black" style={{ color: ACCENT }}>{value}</p>
-                  <p className="text-[10px] text-white/30 uppercase tracking-widest mt-0.5">{label}</p>
+                { label: "ท่า",   value: ALL_MOVEMENTS.length },
+                { label: "มีรายละเอียด",   value: ALL_MOVEMENTS.filter(m => "shortDesc" in m && !!(m as {shortDesc?:string}).shortDesc).length },
+                { label: "เส้นทาง",    value: SKILL_PATHWAYS.length },
+              ].map(item => (
+                <div key={item.label} className="text-right">
+                  <p className="text-2xl font-black" style={{ color: ACCENT }}>{item.value}</p>
+                  <p className="text-[10px] text-white/30 uppercase tracking-widest mt-0.5">{item.label}</p>
                 </div>
               ))}
             </div>
@@ -441,8 +440,8 @@ export default function MovementsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-2">
         <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Guided Pathways</p>
-            <p className="text-sm text-gray-600 mt-1">เข้า pathway ก่อน ถ้าคุณอยากรู้ว่า movement ไหนควรมาก่อนหรือมาหลัง</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">เส้นทางฝึก</p>
+            <p className="text-sm text-gray-600 mt-1">ดูเส้นทางฝึกก่อน ถ้าอยากรู้ว่าท่าไหนควรมาก่อนหรือมาหลัง</p>
           </div>
           <Link href="/pathways" className="text-xs font-bold text-gray-500 hover:text-gray-800 transition-colors">
             ดูทั้งหมด →
@@ -452,13 +451,6 @@ export default function MovementsPage() {
           {SKILL_PATHWAYS.slice(0, 3).map(pathway => (
             <PathwayPreviewCard key={pathway.slug} pathway={pathway} />
           ))}
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-        <div className="grid grid-cols-1 xl:grid-cols-[1.05fr_0.95fr] gap-6">
-          <RecommendationResultCard title="Current recommendation" />
-          <SavedProgressPanel />
         </div>
       </div>
 
@@ -553,7 +545,7 @@ export default function MovementsPage() {
               }}
             >
               <GitBranch className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Mind Map</span>
+              <span className="hidden sm:inline">แผนผัง</span>
             </button>
           </div>
         </div>
@@ -639,7 +631,7 @@ export default function MovementsPage() {
                 }}
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                แสดงเฉพาะท่าที่มี Coaching Detail
+                แสดงเฉพาะท่าที่มีรายละเอียด
               </button>
               {activeFilterCount > 0 && (
                 <button
@@ -665,7 +657,7 @@ export default function MovementsPage() {
         {filtered.length === 0 ? (
           <div className="py-24 text-center">
             <BookOpen className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-400 text-sm">ไม่พบ movement ที่ค้นหา</p>
+            <p className="text-gray-400 text-sm">ไม่พบท่าที่ค้นหา</p>
           </div>
         ) : viewMode === "mindmap" ? (
           <MindMapView grouped={grouped} visibleCats={visibleCats} />
@@ -709,7 +701,7 @@ export default function MovementsPage() {
                           {subcat}
                         </span>
                         <span className="text-[10px] text-gray-400 font-medium">
-                          {movements.length} movements
+                          {movements.length} ท่า
                         </span>
                       </div>
 

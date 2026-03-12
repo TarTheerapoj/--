@@ -118,7 +118,7 @@ export default async function MovementDetailPage({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
           {/* Breadcrumb */}
           <div className="flex items-center gap-1.5 text-[10px] text-white/40 font-bold uppercase tracking-widest mb-5 flex-wrap">
-            <Link href="/movements" className="hover:text-white/70 transition-colors">Movement Library</Link>
+            <Link href="/movements" className="hover:text-white/70 transition-colors">คลังท่า</Link>
             <ChevronRight className="w-3 h-3" />
             <span style={{ color: catColor }}>{CATEGORY_LABEL[entry.category]}</span>
             <ChevronRight className="w-3 h-3" />
@@ -187,14 +187,14 @@ export default async function MovementDetailPage({
           {/* Quick info strip */}
           <div className="flex flex-wrap gap-5 mt-6">
             <div>
-              <p className="text-[9px] text-white/25 uppercase tracking-widest mb-1">Category</p>
+              <p className="text-[9px] text-white/25 uppercase tracking-widest mb-1">หมวดหมู่</p>
               <span className="text-xs font-black px-2.5 py-1 rounded"
                 style={{ backgroundColor: `${catColor}25`, color: catColor }}>
                 {CATEGORY_LABEL[entry.category]}
               </span>
             </div>
             <div>
-              <p className="text-[9px] text-white/25 uppercase tracking-widest mb-1">Difficulty</p>
+              <p className="text-[9px] text-white/25 uppercase tracking-widest mb-1">ระดับ</p>
               <div className="flex items-center gap-2">
                 <p className="text-xs font-bold text-white">{DIFFICULTY_LABEL[entry.difficulty]}</p>
                 <DifficultyBandBadge level={entry.difficulty} />
@@ -202,20 +202,20 @@ export default async function MovementDetailPage({
             </div>
             {m?.patterns && m.patterns.length > 0 && (
               <div>
-                <p className="text-[9px] text-white/25 uppercase tracking-widest mb-1">Pattern</p>
+                <p className="text-[9px] text-white/25 uppercase tracking-widest mb-1">รูปแบบ</p>
                 <p className="text-xs font-bold text-white">{m.patterns.join(" · ")}</p>
               </div>
             )}
             <div>
-              <p className="text-[9px] text-white/25 uppercase tracking-widest mb-1">Equipment</p>
+              <p className="text-[9px] text-white/25 uppercase tracking-widest mb-1">อุปกรณ์</p>
               <p className="text-xs font-bold" style={{ color: entry.equipment.length ? "white" : ACCENT }}>
-                {entry.equipment.length ? entry.equipment.join(", ") : "No Equipment"}
+                {entry.equipment.length ? entry.equipment.join(", ") : "ไม่ต้องใช้อุปกรณ์"}
               </p>
             </div>
           </div>
           {bodyDemands.length > 0 && (
             <div className="mt-4">
-              <p className="text-[9px] text-white/25 uppercase tracking-widest mb-2">Body Demand</p>
+              <p className="text-[9px] text-white/25 uppercase tracking-widest mb-2">ส่วนที่ใช้</p>
               <BodyDemandBadges demands={bodyDemands} />
             </div>
           )}
@@ -233,45 +233,44 @@ export default async function MovementDetailPage({
             </div>
             <h2 className="text-lg font-black text-gray-800 mb-2">{entry.name}</h2>
             <p className="text-sm text-gray-400 leading-relaxed mb-6">
-              ยังไม่มี coaching detail สำหรับท่านี้<br />
-              <span className="text-gray-300">กำลังจะเพิ่มเร็วๆ นี้ — </span>
-              <span style={{ color: ACCENT }} className="font-bold">stay tuned</span>
+              ยังไม่มีรายละเอียดสำหรับท่านี้<br />
+              <span className="text-gray-300">กำลังเพิ่มเร็ว ๆ นี้</span>
             </p>
             <div className="bg-white rounded-xl border border-gray-200 p-4 text-left space-y-3 mb-8">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-400 font-medium">Category</span>
+                <span className="text-gray-400 font-medium">หมวดหมู่</span>
                 <span className="font-bold text-gray-700">{CATEGORY_LABEL[entry.category]}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-400 font-medium">Sub-category</span>
+                <span className="text-gray-400 font-medium">หมวดย่อย</span>
                 <span className="font-bold text-gray-700">{entry.subcategory}</span>
               </div>
               {entry.group && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-400 font-medium">Group</span>
+                  <span className="text-gray-400 font-medium">กลุ่ม</span>
                   <span className="font-bold text-gray-700">{entry.group}</span>
                 </div>
               )}
               <div className="flex justify-between text-sm">
-                <span className="text-gray-400 font-medium">Difficulty</span>
+                <span className="text-gray-400 font-medium">ระดับ</span>
                 <span className="font-bold text-gray-700">{DIFFICULTY_LABEL[entry.difficulty]}</span>
               </div>
               {entry.equipment.length > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-400 font-medium">Equipment</span>
+                  <span className="text-gray-400 font-medium">อุปกรณ์</span>
                   <span className="font-bold text-gray-700">{entry.equipment.join(", ")}</span>
                 </div>
               )}
             </div>
             {bodyDemands.length > 0 && (
               <div className="bg-white rounded-xl border border-gray-200 p-4 text-left mb-6">
-                <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-3">Body Demand</p>
+                <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-3">ส่วนที่ใช้</p>
                 <BodyDemandBadges demands={bodyDemands} />
               </div>
             )}
             {stateGuidance.length > 0 && (
               <div className="bg-white rounded-xl border border-gray-200 p-4 text-left mb-6">
-                <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-3">Coach Guidance</p>
+                <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-3">คำแนะนำการฝึก</p>
                 <MovementStateTabs items={stateGuidance} />
               </div>
             )}
@@ -304,7 +303,7 @@ export default async function MovementDetailPage({
             )}
             {relatedPathways.length > 0 && (
               <div className="bg-white rounded-xl border border-gray-200 p-4 text-left mb-6">
-                <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-3">เกี่ยวข้องกับ Pathway</p>
+                <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-3">เกี่ยวข้องกับเส้นทางฝึก</p>
                 <div className="space-y-4">
                   {relatedPathways.map(pathway => (
                     <div key={pathway.slug} className="rounded-lg border border-gray-200 p-3">
@@ -324,7 +323,7 @@ export default async function MovementDetailPage({
               href="/movements"
               className="text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors"
             >
-              ← กลับไป Movement Library
+              ← กลับไปคลังท่า
             </Link>
           </div>
         )}
@@ -373,7 +372,7 @@ export default async function MovementDetailPage({
               {/* Progression Chain */}
               {(m.regressions.length > 0 || m.progressions.length > 0) && (
                 <section className="bg-white rounded-xl border border-gray-200 p-6">
-                  <SectionHeader label="เส้นทาง Progression" />
+                  <SectionHeader label="ลำดับพัฒนาท่า" />
                   <div className="flex items-stretch gap-2 overflow-x-auto pb-1">
                     {m.regressions.map((s: string) => {
                       const rm = getMovementBySlug(s);
@@ -412,7 +411,7 @@ export default async function MovementDetailPage({
 
               {relatedPathways.length > 0 && (
                 <section className="bg-white rounded-xl border border-gray-200 p-6">
-                  <SectionHeader label="Skill Pathways ที่เกี่ยวข้อง" />
+                  <SectionHeader label="เส้นทางฝึกที่เกี่ยวข้อง" />
                   <div className="space-y-5">
                     {relatedPathways.map(pathway => (
                       <div key={pathway.slug} className="rounded-xl border border-gray-200 p-4">
@@ -434,7 +433,7 @@ export default async function MovementDetailPage({
                             href={`/pathways/${pathway.slug}`}
                             className="text-xs font-bold px-3 py-1.5 rounded-md border border-gray-200 text-gray-500 hover:text-gray-800 hover:border-gray-300 transition-colors"
                           >
-                            ดู pathway
+                            ดูเส้นทางฝึก
                           </Link>
                         </div>
                         <div className="mt-4">
@@ -466,7 +465,7 @@ export default async function MovementDetailPage({
               {/* Coaching Cues */}
               {m.cues.length > 0 && (
                 <section className="bg-white rounded-xl border border-gray-200 p-6">
-                  <SectionHeader label="Coaching Cues" />
+                  <SectionHeader label="จุดสำคัญที่ต้องโฟกัส" />
                   <ul className="space-y-3">
                     {m.cues.map((cue: string, i: number) => (
                       <li key={i} className="flex items-start gap-3 text-sm text-gray-600">
@@ -487,7 +486,7 @@ export default async function MovementDetailPage({
                   </div>
                   {m.scalingNote && (
                     <div className="p-4 rounded-xl bg-gray-50 border border-gray-200">
-                      <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5">Scaling Options</p>
+                      <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5">ตัวเลือกการปรับ</p>
                       <p className="text-sm text-gray-600 leading-relaxed">{m.scalingNote}</p>
                     </div>
                   )}
@@ -499,7 +498,7 @@ export default async function MovementDetailPage({
                 <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200">
                   <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-[9px] font-black uppercase tracking-widest text-amber-600 mb-1">Safety Note</p>
+                    <p className="text-[9px] font-black uppercase tracking-widest text-amber-600 mb-1">ข้อควรระวัง</p>
                     <p className="text-sm text-amber-800 leading-relaxed">{m.safetyNote}</p>
                   </div>
                 </div>
@@ -548,8 +547,7 @@ export default async function MovementDetailPage({
               {/* Prerequisites */}
               {m.prerequisites.length > 0 && (
                 <section className="bg-white rounded-xl border border-gray-200 p-5">
-                  <SectionHeader label="Prerequisites" />
-                  <p className="text-[10px] text-gray-400 mb-3">ต้องทำได้ก่อน</p>
+                  <SectionHeader label="ท่าที่ต้องทำได้ก่อน" />
                   <div className="space-y-2">
                     {m.prerequisites.map((s: string) => (
                       <MovementChip key={s} slug={s} role="prerequisite" />
@@ -561,8 +559,7 @@ export default async function MovementDetailPage({
               {/* Progressions */}
               {m.progressions.length > 0 && (
                 <section className="bg-white rounded-xl border border-gray-200 p-5">
-                  <SectionHeader label="Progressions" />
-                  <p className="text-[10px] text-gray-400 mb-3">ขั้นต่อไปหลังท่านี้</p>
+                  <SectionHeader label="ท่าถัดไปที่ควรฝึก" />
                   <div className="space-y-2">
                     {m.progressions.map((s: string) => (
                       <MovementChip key={s} slug={s} role="progression" />
@@ -586,7 +583,7 @@ export default async function MovementDetailPage({
               {/* Tags */}
               {m.tags.length > 0 && (
                 <section className="bg-white rounded-xl border border-gray-200 p-5">
-                  <SectionHeader label="Tags" />
+                  <SectionHeader label="แท็ก" />
                   <div className="flex flex-wrap gap-1.5">
                     {m.tags.map((tag: string) => (
                       <span key={tag} className="text-[10px] px-2 py-0.5 bg-gray-100 text-gray-500 rounded-md font-medium">
@@ -633,7 +630,7 @@ export default async function MovementDetailPage({
                 href="/movements"
                 className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors pt-1"
               >
-                ← กลับไป Movement Library
+                ← กลับไปคลังท่า
               </Link>
             </div>
           </div>

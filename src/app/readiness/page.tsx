@@ -13,21 +13,21 @@ export default function ReadinessPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
           <div className="flex items-center gap-2 mb-4">
             <span className="text-[10px] font-black tracking-[0.25em] uppercase" style={{ color: ACCENT }}>
-              Movement V3 · Readiness
+              Movement V3 · เช็กความพร้อม
             </span>
           </div>
           <div className="flex items-start justify-between gap-6 flex-wrap">
             <div className="max-w-3xl">
               <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
-                <span style={{ color: ACCENT }}>Readiness</span> Checks
+                <span style={{ color: ACCENT }}>เช็กความพร้อม</span> ก่อนเพิ่มความยาก
               </h1>
               <p className="text-white/40 text-sm mt-2 leading-relaxed">
-                self-check แบบ practical สำหรับดูว่าควร build foundation ก่อน หรือพร้อม push volume / performance ต่อแล้ว
+                ใช้คำถามสั้น ๆ ช่วยดูว่าควรกลับไปปูพื้นก่อน หรือเริ่มขยับความยากและปริมาณการฝึกต่อได้แล้ว
               </p>
             </div>
             <div className="text-right">
               <p className="text-2xl font-black" style={{ color: ACCENT }}>{READINESS_PROFILES.length}</p>
-              <p className="text-[10px] text-white/30 uppercase tracking-widest mt-0.5">Profiles</p>
+              <p className="text-[10px] text-white/30 uppercase tracking-widest mt-0.5">ชุดเช็ก</p>
             </div>
           </div>
         </div>
@@ -39,9 +39,9 @@ export default function ReadinessPage() {
             <Target className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-sm font-black text-gray-900">How to use this</p>
+            <p className="text-sm font-black text-gray-900">ใช้อย่างไร</p>
             <p className="text-sm text-gray-600 mt-1 leading-relaxed">
-              อย่ามอง readiness เป็น pass/fail ให้มองเป็นภาพรวมว่า bottleneck ของคุณอยู่ตรง demand ไหน แล้วค่อยย้อนกลับไป movement หรือ pathway ที่ตรงกับมันจริง ๆ
+              ไม่ต้องมองว่าเป็นการสอบผ่านหรือไม่ผ่าน ให้มองว่าอะไรคือจุดที่ยังติดอยู่ แล้วค่อยย้อนกลับไปฝึกท่าหรือเส้นทางที่ตรงกับจุดนั้น
             </p>
           </div>
         </div>

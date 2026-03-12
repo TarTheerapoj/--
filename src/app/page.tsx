@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, BarChart3, Dumbbell, MapPin, ChevronRight, Clock, BookOpen, Sparkles } from "lucide-react";
 import { SUMMARY_STATS, WORKOUTS } from "@/lib/data/workouts";
-import { RecommendationResultCard, SavedProgressPanel } from "@/components/V3Widgets";
+import { RecommendationResultCard, RecommendationSupportPanel } from "@/components/V3Widgets";
 
 const latest = SUMMARY_STATS.participationByYear[SUMMARY_STATS.participationByYear.length - 1];
 
@@ -9,11 +9,11 @@ const TICKER_ITEMS = [
   "CROSSFIT OPEN 2026 THAILAND",
   `${SUMMARY_STATS.totalAthletes} นักกีฬา · ${SUMMARY_STATS.totalAffiliates} Affiliates · 7 จังหวัด · 4 ภาค`,
   "CROSSFIT OPEN 26.1 · 26.2 · 26.3",
-  "MOVEMENT LIBRARY · 127 ท่า · VIDEO PREVIEW →",
+  "คลังท่า · 127 ท่า · วิดีโอพรีวิว →",
   "CROSSFIT OPEN 2026 THAILAND",
   `${SUMMARY_STATS.totalAthletes} นักกีฬา · ${SUMMARY_STATS.totalAffiliates} Affiliates · 7 จังหวัด · 4 ภาค`,
   "CROSSFIT OPEN 26.1 · 26.2 · 26.3",
-  "MOVEMENT LIBRARY · 127 ท่า · VIDEO PREVIEW →",
+  "คลังท่า · 127 ท่า · วิดีโอพรีวิว →",
 ];
 
 const NEWS_CARDS = [
@@ -42,9 +42,9 @@ const NEWS_CARDS = [
     iconLabel: "WOD",
   },
   {
-    tag: "MOVEMENT LIBRARY",
-    title: "คลังท่าออกกำลังกาย 127 ท่า พร้อม Video",
-    sub: "35 ท่าพร้อมรายละเอียด · YouTube Preview · CrossFit Official →",
+    tag: "คลังท่า",
+    title: "คลังท่าออกกำลังกาย 127 ท่า พร้อมวิดีโอ",
+    sub: "35 ท่าพร้อมรายละเอียด · พรีวิวจาก YouTube · CrossFit Official →",
     href: "/movements",
     accent: false,
     comingSoon: false,
@@ -55,8 +55,8 @@ const NEWS_CARDS = [
   },
   {
     tag: "MOVEMENT V3",
-    title: "Recommendation, Saved Progress และ Readiness Checks",
-    sub: "Personalized pathway · local save · coach mode →",
+    title: "จุดเริ่มต้นและเช็กความพร้อม",
+    sub: "ตอบ 2 ข้อ · เลือกจุดเริ่มต้น · ค่อยไปต่อ →",
     href: "/recommend",
     accent: false,
     comingSoon: false,
@@ -192,10 +192,10 @@ export default function LandingPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <p className="text-sm font-black text-[#111]">Movement Library</p>
+                  <p className="text-sm font-black text-[#111]">คลังท่า</p>
                   <span className="text-[9px] font-black px-1.5 py-0.5 rounded" style={{ backgroundColor: "#9BEC00", color: "#111" }}>NEW</span>
                 </div>
-                <p className="text-xs text-[#888] truncate">35 ท่าพร้อมรายละเอียด · YouTube Preview · 127 ท่าทั้งหมด</p>
+                <p className="text-xs text-[#888] truncate">35 ท่าพร้อมรายละเอียด · วิดีโอพรีวิว · 127 ท่าทั้งหมด</p>
               </div>
               <ChevronRight className="w-4 h-4 text-[#ccc] group-hover:text-primary shrink-0 transition-colors" />
             </Link>
@@ -250,13 +250,13 @@ export default function LandingPage() {
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div>
               <p className="text-[10px] font-black tracking-[0.25em] uppercase" style={{ color: "#9BEC00" }}>Movement V3</p>
-              <p className="text-sm text-[#666] mt-1">ระบบแนะนำฝึก, saved progress, และ readiness checks แบบ local-first</p>
+              <p className="text-sm text-[#666] mt-1">ระบบช่วยเลือกจุดเริ่มต้นและเช็กความพร้อม ที่เริ่มใช้งานได้ทันทีแบบไม่ต้องตั้งค่าอะไรเพิ่ม</p>
             </div>
-            <Link href="/recommend" className="text-xs font-bold text-[#888] hover:text-primary transition-colors">เปิด Recommendation Builder →</Link>
+            <Link href="/recommend" className="text-xs font-bold text-[#888] hover:text-primary transition-colors">เปิดหน้าจุดเริ่มต้น →</Link>
           </div>
           <div className="grid grid-cols-1 xl:grid-cols-[1.05fr_0.95fr] gap-6">
-            <RecommendationResultCard title="Your current recommendation" />
-            <SavedProgressPanel />
+            <RecommendationResultCard title="คำแนะนำล่าสุดของคุณ" />
+            <RecommendationSupportPanel />
           </div>
         </div>
       </section>
